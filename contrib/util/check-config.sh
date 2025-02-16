@@ -25,7 +25,7 @@ if [ $# -gt 0 ]; then
   CONFIG="$1"
 fi
 
-if ! command -v zgrep >/dev/null 2>&1; then
+if ! command -v zgrep >/dev/null 2>&1 || eval "cat /sys/kernel/security/apparmor/profiles | grep -q 'zgrep (enforce)'"; then
   zgrep() {
     zcat "$2" | grep "$1"
   }
@@ -55,6 +55,10 @@ is_set_as_module() {
 }
 
 color() {
+  if [ -n "$NO_COLOR" ]; then
+    return
+  fi
+
   codes=
   if [ "$1" = 'bold' ]; then
     codes=1
@@ -384,7 +388,7 @@ flags="
   CGROUPS CGROUP_PIDS CGROUP_CPUACCT CGROUP_DEVICE CGROUP_FREEZER CGROUP_SCHED CPUSETS MEMCG
   KEYS
   VETH BRIDGE BRIDGE_NETFILTER
-  IP_NF_FILTER IP_NF_TARGET_MASQUERADE
+  IP_NF_FILTER IP_NF_TARGET_MASQUERADE IP_NF_TARGET_REJECT
   NETFILTER_XT_MATCH_ADDRTYPE NETFILTER_XT_MATCH_CONNTRACK NETFILTER_XT_MATCH_IPVS NETFILTER_XT_MATCH_COMMENT NETFILTER_XT_MATCH_MULTIPORT
   IP_NF_NAT NF_NAT
   POSIX_MQUEUE
